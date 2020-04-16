@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Recorder POC</title>
+</head>
+
+<body>
+    <script>
+        const recorder = (function () {
+            let mediaRecorder;
+            let audioChunks;
+            let audio;
+            function start() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        audioChunks= [];
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        mediaRecorder.addEventListener("dataavailable", event => {
+                            audioChunks.push(event.data);
+                        });
+
+                        mediaRecorder.addEventListener("stop", () => {
+                            const audioBlob = new Blob(audioChunks);
+                            const audioUrl = URL.createObjectURL(audioBlob);
+                            // player.src = audioUrl;
+                            audio = new Audio(audioUrl);
+                        });
+                    });
+
+            }
+
+            function play(){
+                audio.play();
+            }
+            function stop() {
+                mediaRecorder.stop();
+            }
+            return {
+                start,
+                stop,
+                play
+            }
+        })();
+    </script>
+</body>
+<button onclick="recorder.start()">Start Recording</button>
+<button onclick="recorder.stop()">Stop Recording</button>
+<br>
+<br>
+<br>
+Start and Stop the recording and then press play
+<br>
+<br>
+<br>
+<button onclick="recorder.play()">Play</button>
+<!-- <audio id="player" controls></audio> -->
+</html>
